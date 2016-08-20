@@ -1,10 +1,13 @@
 // event listener to respond to "Show another quote" button clicks
 // when user clicks anywhere on the button, the "printQuote" function is called
 
-document.getElementById('loadQuote').addEventListener("click", printQuote, false);
+document.getElementById("loadQuote").addEventListener("click", printQuote, false);
 document.getElementById("loadQuote").addEventListener("click", changeColor, false);
+document.getElementById("autoQuote").addEventListener("click", startAutoQuote, false);
+document.getElementById("autoQuote").addEventListener("click", changeColor, false);
 
-// Created array of quotes. Global variable.
+// Global variables
+// Created array of quotes. 
 
 var quote = [
 	{
@@ -12,16 +15,16 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'In the House of Commons',
 		year: 1906,
-		tags: 'inspiration',
+		tags: 'Inspiration',
 		displayed: false
 	},
 	{
 		quote: 'What is the use of living, if it be not to strive for noble' + 
 		'causes and to make this muddled world a better place for those who will live in it after we are gone?',
 		source: 'Sir Winston Churchill',
-		citation: 'Speech at Kinnaird Hall, Dundee, Scotland ("Unemployment")',
+		citation: 'Speech at Kinnaird Hall, Dundee, Scotland',
 		year: 1908,
-		tags: 'inspiration',
+		tags: 'Inspiration',
 		displayed: false
 	},
 	{
@@ -29,7 +32,7 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'Speech in the House of Commons',
 		year: 1916,
-		tags: 'reality',
+		tags: 'Reality Check',
 		displayed: false
 	},
 	{
@@ -37,7 +40,7 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'Speech at Lord Mayor’s Luncheon, Mansion House, London',
 		year: 1942,
-		tags: 'reality',
+		tags: 'Reality Check',
 		displayed: false
 	},
 	{
@@ -45,58 +48,54 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'Speech in the House of Commons',
 		year: 1945,
-		tags: 'reality',
+		tags: 'Reality Check',
 		displayed: false
 	},
 	{
 		quote: 'When I was younger I made it a rule never to take strong drink before lunch. It is now my rule never to do so before breakfast',
 		source: 'Sir Winston Churchill',
-		tags: 'alcoholism',
+		tags: 'Alcoholism',
 		displayed: false
 	},
 ];
 
-// This function creates and HTML string for the innerHTML assignment
+// set a global variable here, so the all quotes displayed function isn't required in printQuote()
+var allQuotesDisplayed = false;
 
-function printQuote(quote) {
-	if (allDisplayed() === true) {
+
+// functions
+// This function creates and HTML string for the innerHTML assignment
+function printQuote() {
+	if (allQuotesDisplayed) {
 		var displayedQuote = getRandomQuote();
 	} else {
 		do {
 			var displayedQuote = getRandomQuote();
 		} 
-		while (displayedQuote.displayed === true)
+		while (displayedQuote.displayed === true) // this just feels gross and is hideously inefficient. 
 		displayedQuote.displayed = true;
 	}
 	
-	
-	html = '<p class="quote">' + displayedQuote['quote'] + '</p>'; 
-	html += '<p class="source">' + displayedQuote['source'];
-	// this feels a little weird testing for underfined in these two conditionals. I looked on Wc3 and they seem to endorse this
-	if (displayedQuote['citation'] !== undefined) {
-		html += '<span class="citation">' + displayedQuote['citation'] + '</span>'
+	// sets the global variable if requied. 
+	if (allQuotesDisplayed === false){
+		if(allDisplayed()){
+			allQuotesDisplayed = true;
+		}
 	}
-	if (displayedQuote['year'] !== undefined) {
-		html += '<span class="citation">' + displayedQuote['year'] + '</span>'
-	}
-	html += '</p>';
-	document.getElementById('quote-box').innerHTML = html;
-	return html;
+
+	setHTML(displayedQuote);
 }
 
-// This function gets the random quote and checks if they have all been displayed. 
 
+// This function gets the random quote.
  function getRandomQuote () {
-	var i = Math.floor(Math.random()*quote.length)
-	var displayedQuote = quote[i];
- 	return displayedQuote;
+	return quote[Math.floor(Math.random()*quote.length)];
 }
 
 // tests to see if all the quotes have been displayed. 
-
 function allDisplayed() {
 	var allDisplayed = true;
-	for (var i = 0; i < quote.length && allDisplayed === true; i++){
+	for (var i = 0; i < quote.length && allDisplayed === true; i++) {
 		if (quote[i].displayed === false){
 			allDisplayed = false;
 		}
@@ -104,16 +103,27 @@ function allDisplayed() {
 	return allDisplayed;
 }
 
-// This function changes the background color. 
+// autoquote section 
+function setAutoQuote(){
+	setHTML(getRandomQuote());
+	changeColor();
+}
 
+// set it to 3 seconds so the for a greater level of quote generating action. 
+function startAutoQuote() {
+	setInterval(setAutoQuote, 3000);
+}
+
+
+// This function changes the background color. 
 function changeColor() {
 	var color = getRandomColor();
     document.body.style.backgroundColor = color;
     document.getElementById('loadQuote').style.backgroundColor = color;
+    document.getElementById('autoQuote').style.backgroundColor = color;
 } 
 
 // Lifted this function from StackExchange to get the random color
-
 function getRandomColor() {
     var chars = '0123456789ABCDEF'.split('');
     var hex = '#';
@@ -123,35 +133,17 @@ function getRandomColor() {
     return hex;
  }
 
-// Resets the quotes to false
-
-function resetQuotes(quote){
-	for (var i = 1; i < quote.length; i++) {
-		quote[i].displayed = false;
+// sets the html 
+function setHTML(displayedQuote) {
+	html = '<p class="quote">' + displayedQuote.quote + '</p>'; 
+	html += '<p class="source">' + displayedQuote['source'];
+	// this feels a little weird testing for underfined in these two conditionals. I looked on Wc3 and they seem to endorse this
+	if (displayedQuote['citation'] !== undefined) {
+		html += '<span class="citation">' + displayedQuote.citation + '</span>'
 	}
+	if (displayedQuote['year'] !== undefined) {
+		html += '<span class="citation">' + displayedQuote.year + '</span>'
+	}
+	html += '<span class="citation">' + displayedQuote['tags'] + '</span></p>';
+	document.getElementById('quote-box').innerHTML = html;
 }
-
-
-
-
-
-
-
-
-
-// this is the RGBA random color code I wrote, but it looks like I need hex to set the color. 
-//  function getRBGColor() {
-// 	var color = 'rgba(';
-// 		color += Math.floor(Math.random() * 266) + ',';
-// 		color += Math.floor(Math.random() * 266) + ',';
-// 		color += Math.floor(Math.random() * 266) + ');';
-//  	return color;
-// }
-
-
-//  function getRandomQuote () {
-//  	if (allDispolayed(quote) !== true){
-//  		return quote[Math.floor(Math.random()*quote.length)]
-//  		console.log
-//  	}
-// }
