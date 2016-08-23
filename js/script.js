@@ -15,8 +15,7 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'In the House of Commons',
 		year: 1906,
-		tags: 'Inspiration',
-		displayed: false
+		tags: 'Inspiration'
 	},
 	{
 		quote: 'What is the use of living, if it be not to strive for noble' + 
@@ -24,83 +23,63 @@ var quote = [
 		source: 'Sir Winston Churchill',
 		citation: 'Speech at Kinnaird Hall, Dundee, Scotland',
 		year: 1908,
-		tags: 'Inspiration',
-		displayed: false
+		tags: 'Inspiration'
 	},
 	{
 		quote: '[The] truth is incontrovertible. Panic may resent it, ignorance may deride it, malice may distort it, but there it is.',
 		source: 'Sir Winston Churchill',
 		citation: 'Speech in the House of Commons',
 		year: 1916,
-		tags: 'Reality Check',
-		displayed: false
+		tags: 'Reality Check'
 	},
 	{
 		quote: 'Now this is not the end. It is not even the beginning of the end. But it is, perhaps, the end of the beginning.',
 		source: 'Sir Winston Churchill',
 		citation: 'Speech at Lord Mayor’s Luncheon, Mansion House, London',
 		year: 1942,
-		tags: 'Reality Check',
-		displayed: false
+		tags: 'Reality Check'
 	},
 	{
 		quote: 'The inherent vice of capitalism is the unequal sharing of blessings. The inherent virtue of Socialism is the equal sharing of miseries',
 		source: 'Sir Winston Churchill',
 		citation: 'Speech in the House of Commons',
 		year: 1945,
-		tags: 'Reality Check',
-		displayed: false
+		tags: 'Reality Check'
 	},
 	{
 		quote: 'When I was younger I made it a rule never to take strong drink before lunch. It is now my rule never to do so before breakfast',
 		source: 'Sir Winston Churchill',
-		tags: 'Alcoholism',
-		displayed: false
+		tags: 'Alcoholism'
 	},
 ];
 
 // set a global variable here, so the all quotes displayed function isn't required in printQuote()
-var allQuotesDisplayed = false;
-
+var usedQuotes = [];
+var autoQuoteOn = false;
+var cancelInterval;
 
 // functions
 // This function creates and HTML string for the innerHTML assignment
 function printQuote() {
-	if (allQuotesDisplayed) {
-		var displayedQuote = getRandomQuote();
-	} else {
-		do {
-			var displayedQuote = getRandomQuote();
-		} 
-		while (displayedQuote.displayed === true) // this just feels gross and is hideously inefficient. 
-		displayedQuote.displayed = true;
-	}
-	
-	// sets the global variable if requied. 
-	if (allQuotesDisplayed === false){
-		if(allDisplayed()){
-			allQuotesDisplayed = true;
-		}
-	}
-
+	displayedQuote = getRandomQuote();
 	setHTML(displayedQuote);
 }
 
-
-// This function gets the random quote.
+// This function gets the random quote. Using a little recurururursion :-) 
  function getRandomQuote () {
-	return quote[Math.floor(Math.random()*quote.length)];
-}
-
-// tests to see if all the quotes have been displayed. 
-function allDisplayed() {
-	var allDisplayed = true;
-	for (var i = 0; i < quote.length && allDisplayed === true; i++) {
-		if (quote[i].displayed === false){
-			allDisplayed = false;
-		}
-	}
-	return allDisplayed;
+ 	var i = Math.floor(Math.random()*quote.length);
+ 	if (usedQuotes.length !== quote.length) {
+ 		var returnedQuote = quote[i];
+ 		if (usedQuotes.indexOf(i) === -1){
+ 		usedQuotes.push(i);	
+ 	} else {
+ 		return getRandomQuote();
+ 	}
+ 	} else {
+ 		usedQuotes = [];
+ 		return getRandomQuote();
+ 	}
+ 	return returnedQuote;
 }
 
 // autoquote section 
@@ -111,7 +90,18 @@ function setAutoQuote(){
 
 // set it to 3 seconds so the for a greater level of quote generating action. 
 function startAutoQuote() {
-	setInterval(setAutoQuote, 3000);
+	if (!autoQuoteOn) {
+		console.log('in here');
+		printQuote();
+		cancelInterval = setInterval(setAutoQuote, 3000);
+		document.getElementById("autoQuote").innerHTML = "Turn off Autoquote";
+		autoQuoteOn = true;
+	} else {
+		console.log("in there");
+		clearInterval(cancelInterval);
+		document.getElementById("autoQuote").innerHTML = "Turn on Autoquote";
+		autoQuoteOn = false;
+	}
 }
 
 
@@ -136,14 +126,15 @@ function getRandomColor() {
 // sets the html 
 function setHTML(displayedQuote) {
 	html = '<p class="quote">' + displayedQuote.quote + '</p>'; 
-	html += '<p class="source">' + displayedQuote['source'];
+	html += '<p class="source">' + displayedQuote.source;
 	// this feels a little weird testing for underfined in these two conditionals. I looked on Wc3 and they seem to endorse this
 	if (displayedQuote['citation'] !== undefined) {
-		html += '<span class="citation">' + displayedQuote.citation + '</span>'
+		html += '<span class="citation">' + displayedQuote.citation + '</span>';
 	}
 	if (displayedQuote['year'] !== undefined) {
-		html += '<span class="citation">' + displayedQuote.year + '</span>'
+		html += '<span class="citation">' + displayedQuote.year + '</span>';
 	}
-	html += '<span class="citation">' + displayedQuote['tags'] + '</span></p>';
+	html += '<span class="citation">' + displayedQuote.tags + '</span></p>';
 	document.getElementById('quote-box').innerHTML = html;
 }
+
